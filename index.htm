@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTest Pro | Zamonamiy Maktab Test va Ta'lim Platformasi</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        accent: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for Visual Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-light {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.3);
+            border-radius: 3px;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col transition-colors duration-300 custom-scrollbar">
+
+    <!-- Navigation Bar -->
+    <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-sky-500/20">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-extrabold tracking-tight gradient-text">EduTest <span class="text-sky-400">PRO</span></span>
+                        <span class="text-[10px] block text-slate-400 font-medium tracking-wide">BILIMDON MAKTAB PLATFORMASI</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex items-center space-x-1" id="desktopNav">
+                    <button onclick="switchTab('dashboard')" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition text-sky-400" data-tab="dashboard">
+                        <i class="fa-solid fa-house mr-1.5"></i> Bosh sahifa
+                    </button>
+                    <button onclick="switchTab('subjects')" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition text-slate-300" data-tab="subjects">
+                        <i class="fa-solid fa-book-open mr-1.5"></i> Fanlar & Testlar
+                    </button>
+                    <button onclick="switchTab('leaderboard')" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition text-slate-300" data-tab="leaderboard">
+                        <i class="fa-solid fa-trophy mr-1.5 text-amber-400"></i> Reyting
+                    </button>
+                    <button onclick="switchTab('subscription')" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition text-slate-300" data-tab="subscription">
+                        <i class="fa-solid fa-crown mr-1.5 text-amber-400"></i> Obuna (VIP)
+                    </button>
+                    <button onclick="openAIAdvisorModal()" class="px-3 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-md shadow-indigo-500/20 transition flex items-center gap-1.5 ml-2">
+                        <i class="fa-solid fa-robot animate-pulse"></i> AI Bilim-Ustoz
+                    </button>
+                </nav>
+
+                <!-- User Quick Info & Role Switcher -->
+                <div class="flex items-center gap-3">
+                    <!-- Role Switcher Dropdown (Demo Feature) -->
+                    <div class="relative">
+                        <select id="roleSwitcher" onchange="changeRole(this.value)" class="bg-slate-800 border border-slate-700 text-xs text-sky-300 rounded-lg px-2.5 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none cursor-pointer">
+                            <option value="student">👨‍🎓 O'quvchi rejimi</option>
+                            <option value="teacher">👨‍prest O'qituvchi Admin</option>
+                            <option value="superadmin">👑 Katta Admin (Ega)</option>
+                        </select>
+                    </div>
+
+                    <!-- Admin Panel Access Button -->
+                    <button id="adminPanelBtn" onclick="switchTab('adminPanel')" class="hidden px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition items-center gap-1.5">
+                        <i class="fa-solid fa-user-shield"></i> Admin Boshqaruv
+                    </button>
+
+                    <!-- User Profile Dropdown / Modal Trigger -->
+                    <button onclick="switchTab('profile')" class="flex items-center gap-2 pl-2 border-l border-slate-800">
+                        <img id="headerAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Felix" class="w-8 h-8 rounded-full bg-slate-800 border border-sky-500/30" alt="Avatar">
+                        <span id="headerUserName" class="text-xs font-semibold text-slate-200 hidden sm:inline">Jasur Alimov</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- VIEW 1: DASHBOARD / HOME -->
+        <section id="view-dashboard" class="space-y-6">
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-900/50 via-slate-900 to-purple-900/40 border border-slate-800 p-6 sm:p-8">
+                <div class="relative z-10 max-w-2xl">
+                    <span id="subStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                        <i class="fa-solid fa-circle-check text-[10px]"></i> Bepul versiya
+                    </span>
+                    <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+                        Bilimingizni sinang va maktab fanlarini <span class="gradient-text">a'lo baholarga</span> o'zlashtiring!
+                    </h1>
+                    <p class="mt-2 text-sm sm:text-base text-slate-300">
+                        Barcha sinflar uchun fan testlari, 3 xil variantlar, vaqt nazorati va AI aqlli tahlili bilan bilimlaringizni oshiring.
+                    </p>
+                    <div class="mt-5 flex flex-wrap gap-3">
+                        <button onclick="switchTab('subjects')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-lg shadow-sky-500/20 transition flex items-center gap-2">
+                            <i class="fa-solid fa-play"></i> Test topshirishni boshlash
+                        </button>
+                        <button onclick="switchTab('subscription')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 transition flex items-center gap-2">
+                            <i class="fa-solid fa-crown text-amber-400"></i> VIP Obuna olish
+                        </button>
+                    </div>
+                </div>
+                <!-- Background Graphic -->
+                <div class="absolute right-4 bottom-0 opacity-20 sm:opacity-40 pointer-events-none">
+                    <i class="fa-solid fa-brain text-[180px] text-sky-400"></i>
+                </div>
+            </div>
+
+            <!-- Stats Overview Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass rounded-xl p-4 border border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-400">Yechilgan testlar</span>
+                        <i class="fa-solid fa-square-check text-sky-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-white mt-2" id="statCompletedTests">24 ta</div>
+                    <span class="text-[11px] text-emerald-400 font-medium">↑ +3 ta bugun</span>
+                </div>
+                <div class="glass rounded-xl p-4 border border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-400">O'rtacha aniqlik</span>
+                        <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-white mt-2" id="statAccuracy">86%</div>
+                    <span class="text-[11px] text-emerald-400 font-medium">A'lo darajada</span>
+                </div>
+                <div class="glass rounded-xl p-4 border border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-400">Umumiy reyting</span>
+                        <i class="fa-solid fa-trophy text-amber-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-white mt-2" id="statRank">#12</div>
+                    <span class="text-[11px] text-sky-400 font-medium">Toshkent v.</span>
+                </div>
+                <div class="glass rounded-xl p-4 border border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-400">Ketma-ketlik (Streak)</span>
+                        <i class="fa-solid fa-fire text-orange-500 animate-bounce"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-white mt-2">5 Kun</div>
+                    <span class="text-[11px] text-orange-400 font-medium">To'xtamang! 🔥</span>
+                </div>
+            </div>
+
+            <!-- Subject Quick Cards Grid -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-sky-400"></i> Ommabop Fanlar
+                    </h2>
+                    <button onclick="switchTab('subjects')" class="text-xs text-sky-400 hover:underline font-medium">
+                        Barchasini ko'rish →
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="homeSubjectsGrid">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- AI Quick Insight Box -->
+            <div class="rounded-2xl p-5 bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-900 border border-indigo-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <div class="p-3 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 text-2xl">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">AI Bilim-Ustoz Tavsiyasi</h3>
+                        <p class="text-xs text-slate-300 mt-1">
+                            Sizning <span class="text-sky-400 font-semibold">Fizika (2-variant)</span> bo'yicha natijangiz pasaygan. Bugun ushbu fan bo'yicha 10 daqiqa mashq bajarishni tavsiya qilamiz!
+                        </p>
+                    </div>
+                </div>
+                <button onclick="openAIAdvisorModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition whitespace-nowrap">
+                    Maslahat olish
+                </button>
+            </div>
+        </section>
+
+        <!-- VIEW 2: SUBJECTS & TESTS CATALOG -->
+        <section id="view-subjects" class="hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Maktab Fanlari va Testlar</h1>
+                    <p class="text-xs text-slate-400 mt-0.5">Kerakli fanni tanlang, variantni belgilang va taymer ostida test yeching.</p>
+                </div>
+
+                <!-- Filters -->
+                <div class="flex items-center gap-2">
+                    <button onclick="filterSubjectType('all')" class="subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 text-slate-950" data-type="all">Hamma testlar</button>
+                    <button onclick="filterSubjectType('free')" class="subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700" data-type="free">Bepul testlar</button>
+                    <button onclick="filterSubjectType('paid')" class="subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-amber-400 border border-slate-700" data-type="paid"><i class="fa-solid fa-crown text-[10px] mr-1"></i> VIP Testlar</button>
+                </div>
+            </div>
+
+            <!-- Subject Cards Container -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="allSubjectsGrid">
+                <!-- Dynamic Content via JS -->
+            </div>
+        </section>
+
+        <!-- VIEW 3: ACTIVE TEST TAKING SCREEN -->
+        <section id="view-testEngine" class="hidden max-w-3xl mx-auto space-y-5">
+            <!-- Test Header Banner -->
+            <div class="glass rounded-2xl p-5 border border-slate-800 flex items-center justify-between">
+                <div>
+                    <span id="activeTestCategory" class="text-xs font-bold text-sky-400 uppercase tracking-wider">Matematika</span>
+                    <h2 id="activeTestTitle" class="text-lg font-extrabold text-white">1-Variant: Algebra va Geometriya asoslari</h2>
+                    <p class="text-xs text-slate-400">Jami 10 ta savol • Ball to'plash rejimi</p>
+                </div>
+                <!-- Countdown Timer Display -->
+                <div class="text-right">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold">Qolgan vaqt</span>
+                    <div id="testTimer" class="text-2xl font-black text-amber-400 tracking-wider">15:00</div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div id="testProgressBar" class="bg-gradient-to-r from-sky-500 to-indigo-500 h-2 transition-all duration-300" style="width: 10%"></div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="glass rounded-2xl p-6 border border-slate-800 space-y-6">
+                <div class="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800/80 pb-3">
+                    <span>Savol <span id="currentQIndex" class="text-sky-400 font-bold">1</span> / <span id="totalQCount">10</span></span>
+                    <span id="testVariantBadge" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold">1-Variant</span>
+                </div>
+
+                <div id="questionText" class="text-base sm:text-lg font-semibold text-slate-100">
+                    <!-- Question prompt here -->
+                </div>
+
+                <!-- Options List -->
+                <div id="optionsContainer" class="space-y-3">
+                    <!-- Option buttons populated by JS -->
+                </div>
+
+                <!-- Controls -->
+                <div class="flex items-center justify-between pt-4 border-t border-slate-800/80">
+                    <button onclick="prevQuestion()" id="prevQBtn" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40" disabled>
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Oldingisi
+                    </button>
+                    <button onclick="nextQuestion()" id="nextQBtn" class="px-5 py-2 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950">
+                        Keyingisi <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                    <button onclick="finishTestModal()" id="submitTestBtn" class="hidden px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950">
+                        Testni yakunlash <i class="fa-solid fa-check ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: TEST RESULTS & ERROR REVIEW -->
+        <section id="view-testResult" class="hidden max-w-3xl mx-auto space-y-6">
+            <!-- Result Summary Box -->
+            <div class="glass rounded-2xl p-6 border border-slate-800 text-center space-y-4">
+                <div class="inline-flex p-4 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-3xl">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h2 class="text-2xl font-black text-white">Test Yakunlandi!</h2>
+                <p id="resultSubjectInfo" class="text-xs text-slate-400">Matematika - 1-Variant</p>
+
+                <!-- Score Badges -->
+                <div class="grid grid-cols-3 gap-3 max-w-md mx-auto pt-2">
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">To'g'ri javoblar</span>
+                        <span id="resCorrect" class="text-xl font-extrabold text-emerald-400">8 / 10</span>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Natija (%)</span>
+                        <span id="resPercentage" class="text-xl font-extrabold text-sky-400">80%</span>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Sarf qilingan vaqt</span>
+                        <span id="resTimeTaken" class="text-xl font-extrabold text-amber-400">08:42</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-3 pt-2">
+                    <button onclick="switchTab('subjects')" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 hover:bg-slate-700">
+                        Boshqa testlar
+                    </button>
+                    <button onclick="openAIAdvisorForResults()" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-500 flex items-center gap-1.5">
+                        <i class="fa-solid fa-robot"></i> Xatolarni AI tahlil qilish
+                    </button>
+                </div>
+            </div>
+
+            <!-- Detailed Answers & Error Review Section -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-sky-400"></i> Savollar va Xatolarni Tahlil Qilish
+                </h3>
+                <div id="detailedReviewContainer" class="space-y-4">
+                    <!-- Dynamic review cards populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 5: LEADERBOARD / REYTING -->
+        <section id="view-leaderboard" class="hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i> O'quvchilar Reytingi
+                    </h1>
+                    <p class="text-xs text-slate-400">Maktablar o'rtasidagi eng kuchli bilimdonlar saralanadi.</p>
+                </div>
+
+                <!-- Filters for Leaderboard -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Time Filter -->
+                    <select id="leaderboardTimeFilter" onchange="renderLeaderboard()" class="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-2 font-semibold">
+                        <option value="daily">Kunlik Reyting</option>
+                        <option value="monthly" selected>Oylik Reyting</option>
+                        <option value="alltime">Umumiy Reyting</option>
+                    </select>
+
+                    <!-- Subject Filter -->
+                    <select id="leaderboardSubjectFilter" onchange="renderLeaderboard()" class="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-2 font-semibold">
+                        <option value="all">Barcha fanlar bo'yicha</option>
+                        <option value="Matematika">Matematika</option>
+                        <option value="Fizika">Fizika</option>
+                        <option value="Kimyo">Kimyo</option>
+                        <option value="Ingliz tili">Ingliz tili</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Leaderboard Top 3 Podium -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2" id="leaderboardPodium">
+                <!-- Generated dynamically via JS -->
+            </div>
+
+            <!-- Leaderboard Table -->
+            <div class="glass rounded-2xl border border-slate-800 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-900/80 text-xs uppercase text-slate-400 font-semibold border-b border-slate-800">
+                            <tr>
+                                <th class="px-4 py-3">O'rin</th>
+                                <th class="px-4 py-3">O'quvchi</th>
+                                <th class="px-4 py-3">Maktab / Hudud</th>
+                                <th class="px-4 py-3">Bajarilgan testlar</th>
+                                <th class="px-4 py-3 text-right">Umumiy Ball</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardTableBody" class="divide-y divide-slate-800/60">
+                            <!-- Rows dynamic -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 6: MONETIZATION & VIP SUBSCRIPTION -->
+        <section id="view-subscription" class="hidden max-w-4xl mx-auto space-y-6">
+            <div class="text-center space-y-2">
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <i class="fa-solid fa-crown mr-1"></i> Bitta obuna = Barcha fanlar ochiq!
+                </span>
+                <h1 class="text-3xl font-black text-white">Yagona VIP Obuna Rejalari</h1>
+                <p class="text-xs text-slate-400 max-w-lg mx-auto">
+                    Alohida fanlar uchun to'lov qilmaysiz. Bitta obuna bilan maktabdagi hamma fanlar va variantlar cheksiz ochiladi.
+                </p>
+            </div>
+
+            <!-- Subscription Tariff Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                <!-- 1 Oy Tariff -->
+                <div class="glass rounded-2xl p-6 border border-slate-800 flex flex-col justify-between hover:border-sky-500/50 transition">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase">Sinov Obunasi</span>
+                        <h3 class="text-xl font-extrabold text-white mt-1">1 Oylik VIP</h3>
+                        <div class="my-4">
+                            <span class="text-3xl font-black text-sky-400">25 000</span> <span class="text-xs text-slate-400">so'm/oy</span>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-300">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Barcha fanlar ochiq</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Barcha 3 xil variantlar</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> AI Ustoz maslahatlari</li>
+                        </ul>
+                    </div>
+                    <button onclick="openPaymentModal('1 Oylik VIP', '25000')" class="mt-6 w-full py-2.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-sky-400 border border-sky-500/30 transition">
+                        Tanlash & To'lash
+                    </button>
+                </div>
+
+                <!-- 3 Oy Tariff (Popular) -->
+                <div class="relative glass rounded-2xl p-6 border-2 border-amber-500 flex flex-col justify-between bg-gradient-to-b from-amber-500/10 via-slate-900 to-slate-900 shadow-xl shadow-amber-500/10">
+                    <span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500 text-slate-950">
+                        ENG MASHHUR REJA
+                    </span>
+                    <div>
+                        <span class="text-xs font-bold text-amber-400 uppercase">Choraklik Ta'lim</span>
+                        <h3 class="text-xl font-extrabold text-white mt-1">3 Oylik VIP</h3>
+                        <div class="my-4">
+                            <span class="text-3xl font-black text-amber-400">60 000</span> <span class="text-xs text-slate-400">so'm (20k/oy)</span>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-300">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Barcha fanlar & variantlar</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Ustuvor AI Tahlil</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Sertifikat olish imkoniyati</li>
+                        </ul>
+                    </div>
+                    <button onclick="openPaymentModal('3 Oylik VIP', '60000')" class="mt-6 w-full py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+                        Obuna Bo'lish
+                    </button>
+                </div>
+
+                <!-- 1 Yil Tariff -->
+                <div class="glass rounded-2xl p-6 border border-slate-800 flex flex-col justify-between hover:border-purple-500/50 transition">
+                    <div>
+                        <span class="text-xs font-bold text-purple-400 uppercase">Yillik Tejamkor</span>
+                        <h3 class="text-xl font-extrabold text-white mt-1">1 Yillik VIP</h3>
+                        <div class="my-4">
+                            <span class="text-3xl font-black text-purple-400">180 000</span> <span class="text-xs text-slate-400">so'm/yil</span>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-300">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Cheksiz kirish 365 kun</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Maxsus sertifikatlar</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Super Chegirma (40%)</li>
+                        </ul>
+                    </div>
+                    <button onclick="openPaymentModal('1 Yillik VIP', '180000')" class="mt-6 w-full py-2.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-purple-400 border border-purple-500/30 transition">
+                        Tanlash & To'lash
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 7: STUDENT PROFILE VIEW -->
+        <section id="view-profile" class="hidden max-w-4xl mx-auto space-y-6">
+            <!-- Profile Info Header Card -->
+            <div class="glass rounded-2xl p-6 border border-slate-800 flex flex-col sm:flex-row items-center gap-6">
+                <img id="profileAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Felix" class="w-24 h-24 rounded-2xl bg-slate-800 border-2 border-sky-500/40 p-1" alt="Avatar">
+                <div class="space-y-1 text-center sm:text-left flex-1">
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <h1 id="profileFullName" class="text-xl font-extrabold text-white">Jasur Alimov</h1>
+                        <span id="profileRoleTag" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">O'quvchi</span>
+                    </div>
+                    <p id="profileSchoolInfo" class="text-xs text-slate-400">9-Sinf • 14-Maktab • Toshkent viloyati</p>
+                    <p id="profilePhone" class="text-xs text-slate-400"><i class="fa-solid fa-phone mr-1"></i> +998 90 123 45 67</p>
+                    
+                    <div class="pt-2 flex flex-wrap gap-2 justify-center sm:justify-start">
+                        <span id="profileSubBadge" class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                            Obuna: Faol (15 kun qoldi)
+                        </span>
+                    </div>
+                </div>
+                <button onclick="openEditProfileModal()" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">
+                    <i class="fa-solid fa-pen-to-square mr-1"></i> Tahrirlash
+                </button>
+            </div>
+
+            <!-- Profile Analytics Charts & History -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass rounded-2xl p-5 border border-slate-800 space-y-3">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-sky-400"></i> Fanlar bo'yicha O'zlashtirish
+                    </h3>
+                    <div class="h-56 relative flex items-center justify-center">
+                        <canvas id="studentSubjectChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass rounded-2xl p-5 border border-slate-800 space-y-3">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-history text-indigo-400"></i> Oxirgi Topshirilgan Testlar
+                    </h3>
+                    <div class="space-y-2.5 max-h-56 overflow-y-auto custom-scrollbar pr-1" id="profileHistoryList">
+                        <!-- Dynamic list -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 8: MANAGEMENT & ADMIN PANEL -->
+        <section id="view-adminPanel" class="hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <div>
+                    <h1 class="text-2xl font-black text-white flex items-center gap-2">
+                        <i class="fa-solid fa-user-shield text-amber-400"></i> Platforma Boshqaruv Paneli
+                    </h1>
+                    <p class="text-xs text-slate-400" id="adminRoleNotice">Super Admin huquqlari bilan tizim boshqaruvi</p>
+                </div>
+
+                <!-- Admin Tab Navigation -->
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="switchAdminSubTab('manageTests')" class="admin-subtab-btn px-3 py-2 rounded-xl text-xs font-bold bg-sky-500 text-slate-950" data-subtab="manageTests">
+                        <i class="fa-solid fa-file-pen mr-1"></i> Testlar Boshqaruvi
+                    </button>
+                    <button id="adminPaymentsTabBtn" onclick="switchAdminSubTab('payments')" class="admin-subtab-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700" data-subtab="payments">
+                        <i class="fa-solid fa-receipt mr-1 text-emerald-400"></i> To'lovlarni Tasdiqlash
+                    </button>
+                    <button id="adminUsersTabBtn" onclick="switchAdminSubTab('users')" class="admin-subtab-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700" data-subtab="users">
+                        <i class="fa-solid fa-users-gear mr-1 text-purple-400"></i> O'qituvchilar va Bloklash
+                    </button>
+                </div>
+            </div>
+
+            <!-- ADMIN SUBTAB 1: MANAGING TESTS -->
+            <div id="admin-subtab-manageTests" class="space-y-5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-white">Mavjud Testlar Ro'yxati</h2>
+                    <button onclick="openCreateTestModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 flex items-center gap-1.5 shadow-lg shadow-sky-500/20">
+                        <i class="fa-solid fa-plus"></i> Yangi Test Qo'shish
+                    </button>
+                </div>
+
+                <div class="glass rounded-2xl border border-slate-800 overflow-hidden">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-900 text-xs uppercase text-slate-400 font-semibold border-b border-slate-800">
+                            <tr>
+                                <th class="px-4 py-3">Fan / Sarlavha</th>
+                                <th class="px-4 py-3">Variant</th>
+                                <th class="px-4 py-3">Turi</th>
+                                <th class="px-4 py-3">Vaqt</th>
+                                <th class="px-4 py-3">Muallif</th>
+                                <th class="px-4 py-3 text-right">Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTestsTableBody" class="divide-y divide-slate-800/60">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ADMIN SUBTAB 2: PAYMENTS APPROVAL (SUPER ADMIN ONLY) -->
+            <div id="admin-subtab-payments" class="hidden space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass rounded-xl p-4 border border-slate-800">
+                        <span class="text-xs text-slate-400">Jami Tushum (Oylik)</span>
+                        <div class="text-2xl font-black text-emerald-400 mt-1">4,250,000 so'm</div>
+                    </div>
+                    <div class="glass rounded-xl p-4 border border-slate-800">
+                        <span class="text-xs text-slate-400">Kutayotgan So'rovlar</span>
+                        <div class="text-2xl font-black text-amber-400 mt-1" id="pendingPayCount">2 ta</div>
+                    </div>
+                    <div class="glass rounded-xl p-4 border border-slate-800">
+                        <span class="text-xs text-slate-400">Aktiv VIP Obunachilar</span>
+                        <div class="text-2xl font-black text-sky-400 mt-1">142 ta</div>
+                    </div>
+                </div>
+
+                <h2 class="text-lg font-bold text-white">To'lov Tasdiqlash So'rovlari</h2>
+                <div class="glass rounded-2xl border border-slate-800 overflow-hidden">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-900 text-xs uppercase text-slate-400 font-semibold border-b border-slate-800">
+                            <tr>
+                                <th class="px-4 py-3">O'quvchi</th>
+                                <th class="px-4 py-3">Tariff & Mablaq</th>
+                                <th class="px-4 py-3">To'lov Turi</th>
+                                <th class="px-4 py-3">Chek / Izoh</th>
+                                <th class="px-4 py-3 text-right">Tasdiqlash Muddatini Tanlang</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminPaymentsTableBody" class="divide-y divide-slate-800/60">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ADMIN SUBTAB 3: USERS & TEACHER PERMISSIONS (SUPER ADMIN ONLY) -->
+            <div id="admin-subtab-users" class="hidden space-y-5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-white">Foydalanuvchilar va O'qituvchilar Boshqaruvi</h2>
+                    <span class="text-xs text-slate-400">Huquqlarni berish, admin tayinlash va bloklash</span>
+                </div>
+
+                <div class="glass rounded-2xl border border-slate-800 overflow-hidden">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-900 text-xs uppercase text-slate-400 font-semibold border-b border-slate-800">
+                            <tr>
+                                <th class="px-4 py-3">Foydalanuvchi</th>
+                                <th class="px-4 py-3">Roli</th>
+                                <th class="px-4 py-3">Holat</th>
+                                <th class="px-4 py-3 text-right">Amallar & Huquqlar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersTableBody" class="divide-y divide-slate-800/60">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: AI BILIM-USTOZ ADVISOR MODAL -->
+    <div id="aiAdvisorModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass rounded-2xl border border-indigo-500/30 max-w-xl w-full p-6 space-y-4 shadow-2xl relative">
+            <button onclick="closeAIAdvisorModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white text-lg">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">AI Bilim-Ustoz Yordamchisi</h3>
+                    <p class="text-xs text-slate-400">Gemini sun'iy intellekti asosida bilim maslahatxona</p>
+                </div>
+            </div>
+
+            <div id="aiChatWindow" class="h-64 overflow-y-auto space-y-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 text-xs custom-scrollbar">
+                <div class="flex gap-2">
+                    <div class="p-2 rounded-lg bg-indigo-600/20 text-indigo-300 max-w-[85%] border border-indigo-500/20">
+                        Arom! Men sizning aqlli ta'lim yordamchingizman. Qaysi fan bo'yicha qiyinchilikka duch kelyapsiz yoki qanday maslahat kerak?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick AI Prompt Buttons -->
+            <div class="flex flex-wrap gap-1.5">
+                <button onclick="sendQuickAIPrompt('Mening xatolarimni tahlil qilib ber')" class="px-2.5 py-1 rounded-lg text-[11px] bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700">
+                    💡 Xatolar tahlili
+                </button>
+                <button onclick="sendQuickAIPrompt('Matematika formulalarini tez yodlash usuli')" class="px-2.5 py-1 rounded-lg text-[11px] bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700">
+                    📐 Matematika maslahati
+                </button>
+                <button onclick="sendQuickAIPrompt('Imtihonga tayyorgarlik rejasini tuzib ber')" class="px-2.5 py-1 rounded-lg text-[11px] bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700">
+                    📅 Imtihon rejasi
+                </button>
+            </div>
+
+            <div class="flex gap-2">
+                <input type="text" id="aiInputPrompt" placeholder="Savolingizni yozing..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                <button onclick="sendAIMessage()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition">
+                    Yuborish
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: PAYMENT SIMULATION MODAL -->
+    <div id="paymentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass rounded-2xl border border-slate-800 max-w-md w-full p-6 space-y-4 relative">
+            <button onclick="closePaymentModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-lg font-black text-white text-center">To'lov Usulini Tanlang</h3>
+            <p id="payModalTariffInfo" class="text-xs text-center text-sky-400 font-semibold">1 Oylik VIP Obuna - 25 000 so'm</p>
+
+            <!-- Payment Provider Tabs -->
+            <div class="grid grid-cols-3 gap-2 py-2">
+                <button onclick="selectPayProvider('click')" id="payBtnClick" class="p-3 rounded-xl border border-sky-500 bg-sky-500/10 text-sky-400 text-center font-bold text-xs">
+                    CLICK
+                </button>
+                <button onclick="selectPayProvider('payme')" id="payBtnPayme" class="p-3 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 text-center font-bold text-xs">
+                    PAYME / PAYNET
+                </button>
+                <button onclick="selectPayProvider('card')" id="payBtnCard" class="p-3 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 text-center font-bold text-xs">
+                    KARTA (8600...)
+                </button>
+            </div>
+
+            <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 text-xs">
+                <p class="text-slate-300 font-medium">To'lov qilish bo'yicha ko'rsatma:</p>
+                <p class="text-slate-400" id="paymentInstruction">
+                    Karta raqamiga: <span class="text-amber-400 font-bold">8600 1234 5678 9012</span> (Jasur A.) mablag'ni o'tkazing va chek raqamini quyi qismga kiriting.
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs text-slate-400 font-medium">Chek / Tranzaksiya raqami yoki izoh</label>
+                <input type="text" id="paymentReceiptInput" placeholder="Masalan: Tranzaksiya #98765432" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+            </div>
+
+            <button onclick="submitPaymentProof()" class="w-full py-3 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition">
+                To'lov Chekini Yuborish (Tasdiqlashga)
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: CREATE / EDIT TEST MODAL -->
+    <div id="createTestModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass rounded-2xl border border-slate-800 max-w-xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar relative">
+            <button onclick="closeCreateTestModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-lg font-bold text-white">Yangi Test Tuzish / Qo'shish</h3>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="text-slate-400 block mb-1">Fan nomi</label>
+                    <select id="newTestSubject" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
+                        <option value="Matematika">Matematika</option>
+                        <option value="Fizika">Fizika</option>
+                        <option value="Kimyo">Kimyo</option>
+                        <option value="Biologiya">Biologiya</option>
+                        <option value="Ingliz tili">Ingliz tili</option>
+                        <option value="Informotika">Informotika</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-slate-400 block mb-1">Test Nomi / Sarlavhasi</label>
+                    <input type="text" id="newTestTitle" placeholder="Masalan: Kinematika va Dinamika testlari" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Variant</label>
+                        <select id="newTestVariant" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
+                            <option value="1-variant">1-Variant</option>
+                            <option value="2-variant">2-Variant</option>
+                            <option value="3-variant">3-Variant</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Taymer (Daqiqa)</label>
+                        <input type="number" id="newTestTimer" value="15" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Kirish Turi</label>
+                        <select id="newTestIsPaid" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
+                            <option value="false">Bepul Test</option>
+                            <option value="true">VIP (Pullik Obuna)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-2">
+                    <span class="font-bold text-sky-400 block">Savollar qo'shish (Namunaviy tuzuvchi)</span>
+                    <p class="text-slate-400 text-[11px]">Avtomatik 5 ta sifatli savol yaratiladi.</p>
+                </div>
+            </div>
+
+            <button onclick="saveNewTest()" class="w-full py-2.5 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 transition">
+                Testni Saqlash & Nashr Qilish
+            </button>
+        </div>
+    </div>
+
+    <!-- Application Logic Script -->
+    <script>
+        // Global Application State
+        const state = {
+            currentUserRole: 'student', // 'student', 'teacher', 'superadmin'
+            userProfile: {
+                fullName: 'Jasur Alimov',
+                school: '14-Maktab, Toshkent v.',
+                grade: '9-Sinf',
+                phone: '+998 90 123 45 67',
+                hasActiveSub: true,
+                subDaysRemaining: 15,
+                completedTests: 24,
+                accuracy: 86
+            },
+            subjects: [
+                { id: 'math', name: 'Matematika', icon: 'fa-calculator', color: 'from-blue-500 to-indigo-600', isPaid: false, description: 'Algebra, Geometriya, Tenglamalar' },
+                { id: 'physics', name: 'Fizika', icon: 'fa-atom', color: 'from-amber-500 to-orange-600', isPaid: true, description: 'Mexanika, Optika, Elektr' },
+                { id: 'chem', name: 'Kimyo', icon: 'fa-flask', color: 'from-emerald-500 to-teal-600', isPaid: false, description: 'Maddalar va reaksiyalar' },
+                { id: 'bio', name: 'Biologiya', icon: 'fa-dna', color: 'from-green-500 to-emerald-700', isPaid: true, description: 'Osimliklar va odam anatomiyasi' },
+                { id: 'eng', name: 'Ingliz tili', icon: 'fa-language', color: 'from-purple-500 to-pink-600', isPaid: true, description: 'Grammar & Vocabulary' },
+                { id: 'info', name: 'Informotika', icon: 'fa-code', color: 'from-sky-500 to-cyan-600', isPaid: false, description: 'Dasturlash va axborot texnologiyalari' }
+            ],
+            tests: [
+                {
+                    id: 101,
+                    subject: 'Matematika',
+                    title: 'Tenglamalar va Tengsizliklar',
+                    variant: '1-variant',
+                    timerMinutes: 15,
+                    isPaid: false,
+                    author: 'Sardor O\'qituvchi',
+                    questions: [
+                        { q: '2x + 10 = 26 tenglamaning ildizini toping.', options: ['x = 8', 'x = 6', 'x = 7', 'x = 10'], correct: 0, exp: '2x = 26 - 10 => 2x = 16 => x = 8' },
+                        { q: 'Kvadratning yuzi 64 sm² bo\'lsa, uning perimetri qancha?', options: ['24 sm', '32 sm', '16 sm', '36 sm'], correct: 1, exp: 'Tomoni a = √64 = 8 sm. Perimetr P = 4 * 8 = 32 sm.' },
+                        { q: '3² + 4² yig\'indisi nechaga teng?', options: ['25', '49', '14', '20'], correct: 0, exp: '9 + 16 = 25.' }
+                    ]
+                },
+                {
+                    id: 102,
+                    subject: 'Fizika',
+                    title: 'Kinematika va Dinamika asoslari',
+                    variant: '1-variant',
+                    timerMinutes: 20,
+                    isPaid: true,
+                    author: 'Orol O\'qituvchi',
+                    questions: [
+                        { q: 'Tezlikning Xalqaro Birliklar Tizimidagi (SI) birligi nima?', options: ['km/h', 'm/s', 'm/min', 'cm/s'], correct: 1, exp: 'SI tizimida tezlik m/s da o\'lchanadi.' },
+                        { q: 'Nyuotonning 2-qonuni formulasini ko\'rsating.', options: ['F = m * a', 'P = m * g', 'v = s / t', 'E = mc²'], correct: 0, exp: 'Kuch kuchlanish va tezlanish ko\'paytmasi F=ma.' }
+                    ]
+                }
+            ],
+            paymentRequests: [
+                { id: 1, studentName: 'Anvar Karimov', tariff: '1 Oylik VIP', amount: '25,000 so\'m', receipt: 'Tranzaksiya #88271', date: 'Bugun, 10:15' },
+                { id: 2, studentName: 'Malika Sobirova', tariff: '3 Oylik VIP', amount: '60,000 so\'m', receipt: 'Tranzaksiya #91123', date: 'Bugun, 09:30' }
+            ],
+            usersList: [
+                { id: 1, name: 'Jasur Alimov', role: 'student', status: 'Aktiv', school: '14-Maktab' },
+                { id: 2, name: 'Sardor O\'qituvchi', role: 'teacher', status: 'Aktiv', school: '14-Maktab' },
+                { id: 3, name: 'Aziza Rahimova', role: 'student', status: 'Bloklangan', school: '5-Maktab' }
+            ],
+            activeTestSession: null,
+            timerInterval: null
+        };
+
+        // View Tab Switching Function
+        function switchTab(tabId) {
+            const views = ['dashboard', 'subjects', 'testEngine', 'testResult', 'leaderboard', 'subscription', 'profile', 'adminPanel'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+            });
+
+            const targetView = document.getElementById(`view-${tabId}`);
+            if (targetView) targetView.classList.remove('hidden');
+
+            // Update Navigation Buttons Active State
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add('text-sky-400', 'bg-slate-800');
+                    btn.classList.remove('text-slate-300');
+                } else {
+                    btn.classList.remove('text-sky-400', 'bg-slate-800');
+                    btn.classList.add('text-slate-300');
+                }
+            });
+
+            // Special initializations based on tab
+            if (tabId === 'leaderboard') renderLeaderboard();
+            if (tabId === 'adminPanel') renderAdminTables();
+            if (tabId === 'profile') renderProfileChart();
+            if (tabId === 'dashboard') renderHomeSubjects();
+            if (tabId === 'subjects') renderSubjectsList();
+        }
+
+        // Change Demo Role (Student, Teacher, Super Admin)
+        function changeRole(role) {
+            state.currentUserRole = role;
+            const adminBtn = document.getElementById('adminPanelBtn');
+            const roleNotice = document.getElementById('adminRoleNotice');
+            const payTabBtn = document.getElementById('adminPaymentsTabBtn');
+            const userTabBtn = document.getElementById('adminUsersTabBtn');
+
+            if (role === 'student') {
+                adminBtn.classList.add('hidden');
+                document.getElementById('headerUserName').innerText = state.userProfile.fullName;
+            } else if (role === 'teacher') {
+                adminBtn.classList.remove('hidden');
+                adminBtn.classList.add('flex');
+                document.getElementById('headerUserName').innerText = 'Sardor O\'qituvchi (Admin)';
+                roleNotice.innerText = "O'qituvchi Admin: Faqat o'zingiz yaratgan testlarni boshqarasiz";
+                if (payTabBtn) payTabBtn.classList.add('hidden');
+                if (userTabBtn) userTabBtn.classList.add('hidden');
+            } else if (role === 'superadmin') {
+                adminBtn.classList.remove('hidden');
+                adminBtn.classList.add('flex');
+                document.getElementById('headerUserName').innerText = 'Katta Admin (Ega)';
+                roleNotice.innerText = "Super Admin: To'liq tizim va to'lovlar boshqaruvi";
+                if (payTabBtn) payTabBtn.classList.remove('hidden');
+                if (userTabBtn) userTabBtn.classList.remove('hidden');
+            }
+        }
+
+        // Render Home Subjects
+        function renderHomeSubjects() {
+            const container = document.getElementById('homeSubjectsGrid');
+            if (!container) return;
+            container.innerHTML = state.subjects.slice(0, 4).map(sub => `
+                <div onclick="startTestFlow('${sub.name}')" class="glass rounded-xl p-4 border border-slate-800 hover:border-sky-500/50 transition cursor-pointer group">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-tr ${sub.color} flex items-center justify-center text-white text-lg shadow-md">
+                            <i class="fa-solid ${sub.icon}"></i>
+                        </div>
+                        ${sub.isPaid ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fa-solid fa-crown mr-1"></i>VIP</span>' : '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">BEPUL</span>'}
+                    </div>
+                    <h3 class="text-sm font-bold text-white group-hover:text-sky-400 transition">${sub.name}</h3>
+                    <p class="text-[11px] text-slate-400 mt-1 line-clamp-1">${sub.description}</p>
+                </div>
+            `).join('');
+        }
+
+        // Render All Subjects View
+        function renderSubjectsList(filter = 'all') {
+            const container = document.getElementById('allSubjectsGrid');
+            if (!container) return;
+
+            let filtered = state.subjects;
+            if (filter === 'free') filtered = state.subjects.filter(s => !s.isPaid);
+            if (filter === 'paid') filtered = state.subjects.filter(s => s.isPaid);
+
+            container.innerHTML = filtered.map(sub => `
+                <div class="glass rounded-2xl p-5 border border-slate-800 flex flex-col justify-between hover:border-sky-500/40 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr ${sub.color} flex items-center justify-center text-white text-xl shadow-lg">
+                                <i class="fa-solid ${sub.icon}"></i>
+                            </div>
+                            ${sub.isPaid ? '<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30"><i class="fa-solid fa-crown mr-1"></i>VIP Obuna</span>' : '<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Bepul Test</span>'}
+                        </div>
+                        <h3 class="text-base font-bold text-white">${sub.name}</h3>
+                        <p class="text-xs text-slate-400 mt-1">${sub.description}</p>
+                        
+                        <div class="mt-4 pt-3 border-t border-slate-800/80 space-y-2">
+                            <span class="text-[11px] font-semibold text-slate-400 block">Mavjud Variantlar:</span>
+                            <div class="flex gap-2">
+                                <button onclick="startTestFlow('${sub.name}', '1-variant')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-sky-400 border border-slate-700">1-Variant</button>
+                                <button onclick="startTestFlow('${sub.name}', '2-variant')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-sky-400 border border-slate-700">2-Variant</button>
+                                <button onclick="startTestFlow('${sub.name}', '3-variant')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-sky-400 border border-slate-700">3-Variant</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="startTestFlow('${sub.name}', '1-variant')" class="mt-5 w-full py-2 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 transition">
+                        Testni Boshlash
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function filterSubjectType(type) {
+            document.querySelectorAll('.subject-filter-btn').forEach(btn => {
+                if (btn.dataset.type === type) {
+                    btn.classList.add('bg-sky-500', 'text-slate-950');
+                    btn.classList.remove('bg-slate-800', 'text-slate-300');
+                } else {
+                    btn.classList.remove('bg-sky-500', 'text-slate-950');
+                    btn.classList.add('bg-slate-800', 'text-slate-300');
+                }
+            });
+            renderSubjectsList(type);
+        }
+
+        // Start Test Engine Session
+        function startTestFlow(subjectName, variant = '1-variant') {
+            const foundTest = state.tests.find(t => t.subject === subjectName && t.variant === variant) || state.tests[0];
+
+            // Check subscription if test is paid
+            if (foundTest.isPaid && !state.userProfile.hasActiveSub) {
+                alert("Ushbu VIP testni yechish uchun obuna bo'lishingiz kerak.");
+                switchTab('subscription');
+                return;
+            }
+
+            state.activeTestSession = {
+                test: foundTest,
+                currentIndex: 0,
+                userAnswers: new Array(foundTest.questions.length).fill(null),
+                timeRemaining: foundTest.timerMinutes * 60,
+                totalTime: foundTest.timerMinutes * 60
+            };
+
+            document.getElementById('activeTestCategory').innerText = foundTest.subject;
+            document.getElementById('activeTestTitle').innerText = foundTest.title;
+            document.getElementById('testVariantBadge').innerText = foundTest.variant;
+            document.getElementById('totalQCount').innerText = foundTest.questions.length;
+
+            startTimer();
+            renderQuestion();
+            switchTab('testEngine');
+        }
+
+        // Render Current Question
+        function renderQuestion() {
+            const sess = state.activeTestSession;
+            const q = sess.test.questions[sess.currentIndex];
+
+            document.getElementById('currentQIndex').innerText = sess.currentIndex + 1;
+            document.getElementById('questionText').innerText = q.q;
+
+            // Progress bar
+            const pct = ((sess.currentIndex + 1) / sess.test.questions.length) * 100;
+            document.getElementById('testProgressBar').style.width = `${pct}%`;
+
+            // Options
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = q.options.map((opt, i) => {
+                const isSelected = sess.userAnswers[sess.currentIndex] === i;
+                return `
+                    <button onclick="selectOption(${i})" class="w-full p-3.5 rounded-xl text-left text-xs font-semibold border transition flex items-center justify-between ${isSelected ? 'bg-sky-500/10 border-sky-500 text-sky-400' : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'}">
+                        <span>${String.fromCharCode(65 + i)}) ${opt}</span>
+                        ${isSelected ? '<i class="fa-solid fa-circle-check text-sky-400"></i>' : ''}
+                    </button>
+                `;
+            }).join('');
+
+            // Controls state
+            document.getElementById('prevQBtn').disabled = sess.currentIndex === 0;
+            if (sess.currentIndex === sess.test.questions.length - 1) {
+                document.getElementById('nextQBtn').classList.add('hidden');
+                document.getElementById('submitTestBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('nextQBtn').classList.remove('hidden');
+                document.getElementById('submitTestBtn').classList.add('hidden');
+            }
+        }
+
+        function selectOption(index) {
+            state.activeTestSession.userAnswers[state.activeTestSession.currentIndex] = index;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (state.activeTestSession.currentIndex > 0) {
+                state.activeTestSession.currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (state.activeTestSession.currentIndex < state.activeTestSession.test.questions.length - 1) {
+                state.activeTestSession.currentIndex++;
+                renderQuestion();
+            }
+        }
+
+        // Countdown Timer Engine
+        function startTimer() {
+            clearInterval(state.timerInterval);
+            state.timerInterval = setInterval(() => {
+                if (!state.activeTestSession) return;
+                state.activeTestSession.timeRemaining--;
+
+                const mins = Math.floor(state.activeTestSession.timeRemaining / 60);
+                const secs = state.activeTestSession.timeRemaining % 60;
+                document.getElementById('testTimer').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+                if (state.activeTestSession.timeRemaining <= 0) {
+                    clearInterval(state.timerInterval);
+                    finishTestModal();
+                }
+            }, 1000);
+        }
+
+        // Calculate and Show Test Results
+        function finishTestModal() {
+            clearInterval(state.timerInterval);
+            const sess = state.activeTestSession;
+            let correctCount = 0;
+
+            sess.test.questions.forEach((q, i) => {
+                if (sess.userAnswers[i] === q.correct) correctCount++;
+            });
+
+            const pct = Math.round((correctCount / sess.test.questions.length) * 100);
+            const timeUsed = sess.totalTime - sess.timeRemaining;
+            const minsUsed = Math.floor(timeUsed / 60);
+            const secsUsed = timeUsed % 60;
+
+            document.getElementById('resCorrect').innerText = `${correctCount} / ${sess.test.questions.length}`;
+            document.getElementById('resPercentage').innerText = `${pct}%`;
+            document.getElementById('resTimeTaken').innerText = `${String(minsUsed).padStart(2, '0')}:${String(secsUsed).padStart(2, '0')}`;
+            document.getElementById('resultSubjectInfo').innerText = `${sess.test.subject} • ${sess.test.variant}`;
+
+            // Render Detailed Error Review Cards
+            const reviewContainer = document.getElementById('detailedReviewContainer');
+            reviewContainer.innerHTML = sess.test.questions.map((q, i) => {
+                const userAns = sess.userAnswers[i];
+                const isCorrect = userAns === q.correct;
+                return `
+                    <div class="glass p-4 rounded-xl border ${isCorrect ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-rose-500/30 bg-rose-500/5'} space-y-2">
+                        <div class="flex items-center justify-between text-xs font-bold">
+                            <span class="text-white">${i + 1}-Savol: ${q.q}</span>
+                            ${isCorrect ? '<span class="text-emerald-400">To\'g\'ri (+1 ball)</span>' : '<span class="text-rose-400">Xato</span>'}
+                        </div>
+                        <div class="text-xs space-y-1">
+                            <p class="text-slate-300">Sizning javobingiz: <span class="${isCorrect ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}">${userAns !== null ? q.options[userAns] : 'Javob berilmadi'}</span></p>
+                            ${!isCorrect ? `<p class="text-slate-300">To'g'ri javob: <span class="text-emerald-400 font-bold">${q.options[q.correct]}</span></p>` : ''}
+                            <p class="text-[11px] text-sky-300 bg-slate-900/80 p-2 rounded-lg border border-slate-800 mt-1"><i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> Izoh: ${q.exp}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            switchTab('testResult');
+        }
+
+        // Render Leaderboard
+        function renderLeaderboard() {
+            const table = document.getElementById('leaderboardTableBody');
+            const podium = document.getElementById('leaderboardPodium');
+            if (!table) return;
+
+            const students = [
+                { rank: 1, name: 'Shahzod Aliyev', school: '1-Maktab, Toshkent', score: 980, tests: 42, avatar: 'Felix' },
+                { rank: 2, name: 'Madina Rahimova', school: '14-Maktab, Farg\'ona', score: 940, tests: 38, avatar: 'Aneka' },
+                { rank: 3, name: 'Jasur Alimov', school: '14-Maktab, Toshkent', score: 890, tests: 24, avatar: 'Felix' },
+                { rank: 4, name: 'Diyorbek Umarov', school: '5-Maktab, Samarqand', score: 820, tests: 30, avatar: 'John' },
+                { rank: 5, name: 'Nigora Yusupova', school: '8-Maktab, Buxoro', score: 790, tests: 28, avatar: 'Maria' }
+            ];
+
+            // Render Podium Top 3
+            podium.innerHTML = students.slice(0, 3).map((st, idx) => `
+                <div class="glass rounded-2xl p-4 border border-slate-800 text-center relative ${idx === 0 ? 'border-amber-500 bg-amber-500/5 order-first sm:order-none' : ''}">
+                    <span class="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${idx === 0 ? 'bg-amber-500 text-slate-950' : idx === 1 ? 'bg-slate-300 text-slate-950' : 'bg-amber-700 text-white'}">${st.rank}</span>
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=${st.avatar}" class="w-14 h-14 rounded-full mx-auto bg-slate-800 mb-2">
+                    <h4 class="text-sm font-bold text-white">${st.name}</h4>
+                    <p class="text-[11px] text-slate-400">${st.school}</p>
+                    <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-black bg-sky-500/10 text-sky-400 border border-sky-500/20">${st.score} ball</span>
+                </div>
+            `).join('');
+
+            // Render Table Rows
+            table.innerHTML = students.map(st => `
+                <tr class="hover:bg-slate-900/50">
+                    <td class="px-4 py-3 font-bold text-sky-400">#${st.rank}</td>
+                    <td class="px-4 py-3 flex items-center gap-2">
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=${st.avatar}" class="w-7 h-7 rounded-full bg-slate-800">
+                        <span class="font-semibold text-white">${st.name}</span>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-slate-400">${st.school}</td>
+                    <td class="px-4 py-3 text-xs">${st.tests} ta</td>
+                    <td class="px-4 py-3 text-right font-bold text-amber-400">${st.score}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Admin Tables
+        function renderAdminTables() {
+            // Tests Table
+            const testsTable = document.getElementById('adminTestsTableBody');
+            if (testsTable) {
+                testsTable.innerHTML = state.tests.map(t => `
+                    <tr>
+                        <td class="px-4 py-3 font-bold text-white">${t.subject} <span class="block text-xs font-normal text-slate-400">${t.title}</span></td>
+                        <td class="px-4 py-3 text-xs text-sky-400 font-semibold">${t.variant}</td>
+                        <td class="px-4 py-3 text-xs">${t.isPaid ? '<span class="text-amber-400 font-bold">VIP</span>' : '<span class="text-emerald-400">Bepul</span>'}</td>
+                        <td class="px-4 py-3 text-xs">${t.timerMinutes} daqiqa</td>
+                        <td class="px-4 py-3 text-xs text-slate-400">${t.author}</td>
+                        <td class="px-4 py-3 text-right">
+                            <button onclick="editTest(${t.id})" class="text-xs text-sky-400 hover:underline mr-2">Tahrirlash</button>
+                            <button onclick="deleteTest(${t.id})" class="text-xs text-rose-400 hover:underline">O'chirish</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Payments Table
+            const payTable = document.getElementById('adminPaymentsTableBody');
+            if (payTable) {
+                payTable.innerHTML = state.paymentRequests.map(p => `
+                    <tr>
+                        <td class="px-4 py-3 font-bold text-white">${p.studentName}</td>
+                        <td class="px-4 py-3 text-xs text-emerald-400 font-bold">${p.tariff} (${p.amount})</td>
+                        <td class="px-4 py-3 text-xs text-slate-300">Click / Karta</td>
+                        <td class="px-4 py-3 text-xs text-slate-400">${p.receipt}</td>
+                        <td class="px-4 py-3 text-right flex items-center justify-end gap-2">
+                            <select id="subDaysSelect_${p.id}" class="bg-slate-900 border border-slate-700 text-xs rounded px-2 py-1 text-slate-200">
+                                <option value="1">1 Kun</option>
+                                <option value="30" selected>1 Oy (30 kun)</option>
+                                <option value="365">1 Yil (365 kun)</option>
+                            </select>
+                            <button onclick="approvePayment(${p.id})" class="px-3 py-1 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs">Tasdiqlash</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Users & Permissions Table
+            const usersTable = document.getElementById('adminUsersTableBody');
+            if (usersTable) {
+                usersTable.innerHTML = state.usersList.map(u => `
+                    <tr>
+                        <td class="px-4 py-3 font-bold text-white">${u.name} <span class="block text-xs font-normal text-slate-400">${u.school}</span></td>
+                        <td class="px-4 py-3 text-xs font-semibold ${u.role === 'teacher' ? 'text-amber-400' : 'text-sky-400'}">${u.role === 'teacher' ? 'O\'qituvchi Admin' : 'O\'quvchi'}</td>
+                        <td class="px-4 py-3 text-xs"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.status === 'Aktiv' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">${u.status}</span></td>
+                        <td class="px-4 py-3 text-right space-x-2">
+                            <button onclick="toggleTeacherRole(${u.id})" class="text-xs text-amber-400 hover:underline">${u.role === 'teacher' ? 'O\'qituvchilikni olish' : 'Adminlik berish'}</button>
+                            <button onclick="toggleBlockUser(${u.id})" class="text-xs text-rose-400 hover:underline">${u.status === 'Aktiv' ? 'Bloklash' : 'Blokdan chiqarish'}</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function switchAdminSubTab(subtab) {
+            ['manageTests', 'payments', 'users'].forEach(st => {
+                const el = document.getElementById(`admin-subtab-${st}`);
+                if (el) el.classList.add('hidden');
+            });
+            document.getElementById(`admin-subtab-${subtab}`).classList.remove('hidden');
+
+            document.querySelectorAll('.admin-subtab-btn').forEach(btn => {
+                if (btn.dataset.subtab === subtab) {
+                    btn.classList.add('bg-sky-500', 'text-slate-950');
+                    btn.classList.remove('bg-slate-800', 'text-slate-300');
+                } else {
+                    btn.classList.remove('bg-sky-500', 'text-slate-950');
+                    btn.classList.add('bg-slate-800', 'text-slate-300');
+                }
+            });
+        }
+
+        // AI Advisor Modal Functions
+        function openAIAdvisorModal() {
+            document.getElementById('aiAdvisorModal').classList.remove('hidden');
+        }
+
+        function closeAIAdvisorModal() {
+            document.getElementById('aiAdvisorModal').classList.add('hidden');
+        }
+
+        function openAIAdvisorForResults() {
+            openAIAdvisorModal();
+            sendQuickAIPrompt("Mening oxirgi topshirgan testimdagi xatolarim bo'yicha tahlil ber va qaysi mavzularni qayta o'qishim kerakligini ayt.");
+        }
+
+        async function sendAIMessage() {
+            const input = document.getElementById('aiInputPrompt');
+            const prompt = input.value.trim();
+            if (!prompt) return;
+
+            appendChatMessage('user', prompt);
+            input.value = '';
+
+            const loadingId = appendChatMessage('ai', 'O\'ylanmoqda...');
+
+            try {
+                // Gemini API Call Integration
+                const apiKey = ""; // Canvas runtime provides this
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `Siz o'zbek tilida gapiradigan maktab o'quvchilari uchun AI Ustozsiz. Javobni qisqa, tushunarli va motivatsiya beruvchi tarzda bering. O'quvchi savoli: ${prompt}` }] }]
+                    })
+                });
+
+                const data = await response.json();
+                const aiReply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Kechirasiz, javob olishda xatolik bo'ldi.";
+                updateChatMessage(loadingId, aiReply);
+            } catch (err) {
+                updateChatMessage(loadingId, "AI bilan bog'lanishda xatolik yuz berdi. Internetni tekshiring.");
+            }
+        }
+
+        function sendQuickAIPrompt(text) {
+            document.getElementById('aiInputPrompt').value = text;
+            sendAIMessage();
+        }
+
+        function appendChatMessage(sender, text) {
+            const chatWin = document.getElementById('aiChatWindow');
+            const msgId = 'msg_' + Date.now();
+            const div = document.createElement('div');
+            div.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+            div.innerHTML = `
+                <div id="${msgId}" class="p-2.5 rounded-xl text-xs max-w-[85%] ${sender === 'user' ? 'bg-sky-500 text-slate-950 font-semibold' : 'bg-indigo-600/20 text-indigo-200 border border-indigo-500/30'}">
+                    ${text}
+                </div>
+            `;
+            chatWin.appendChild(div);
+            chatWin.scrollTop = chatWin.scrollHeight;
+            return msgId;
+        }
+
+        function updateChatMessage(msgId, newText) {
+            const el = document.getElementById(msgId);
+            if (el) el.innerText = newText;
+        }
+
+        // Payment Modal Controls
+        function openPaymentModal(tariff, price) {
+            document.getElementById('payModalTariffInfo').innerText = `${tariff} - ${price} so'm`;
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+
+        function selectPayProvider(provider) {
+            const clickBtn = document.getElementById('payBtnClick');
+            const paymeBtn = document.getElementById('payBtnPayme');
+            const cardBtn = document.getElementById('payBtnCard');
+            const instr = document.getElementById('paymentInstruction');
+
+            [clickBtn, paymeBtn, cardBtn].forEach(b => b.className = "p-3 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 text-center font-bold text-xs");
+
+            if (provider === 'click') {
+                clickBtn.className = "p-3 rounded-xl border border-sky-500 bg-sky-500/10 text-sky-400 text-center font-bold text-xs";
+                instr.innerHTML = "Click ilovasida <b>*880#</b> orqali yoki xizmatlar bo'limidan <b>EduTest Pro</b> ga to'lov qiling.";
+            } else if (provider === 'payme') {
+                paymeBtn.className = "p-3 rounded-xl border border-teal-500 bg-teal-500/10 text-teal-400 text-center font-bold text-xs";
+                instr.innerHTML = "Payme ilovasida 'EduTest Pro' qidiruvi orqali ID raqamingizga to'lov o'tkazing.";
+            } else {
+                cardBtn.className = "p-3 rounded-xl border border-purple-500 bg-purple-500/10 text-purple-400 text-center font-bold text-xs";
+                instr.innerHTML = "Karta: <span class='text-amber-400 font-bold'>8600 1234 5678 9012</span> ga pul o'tkazib chekni yuboring.";
+            }
+        }
+
+        function submitPaymentProof() {
+            const receipt = document.getElementById('paymentReceiptInput').value.trim();
+            if (!receipt) {
+                alert("Iltimos, chek raqamini kiriting!");
+                return;
+            }
+            alert("To'lov so'rovingiz qabul qilindi! Katta admin tez orada tasdiqlaydi.");
+            closePaymentModal();
+        }
+
+        function approvePayment(id) {
+            const daysSelect = document.getElementById(`subDaysSelect_${id}`);
+            const days = daysSelect ? daysSelect.value : 30;
+            state.paymentRequests = state.paymentRequests.filter(p => p.id !== id);
+            alert(`To'lov tasdiqlandi! O'quvchiga ${days} kunlik VIP ruxsat berildi.`);
+            renderAdminTables();
+        }
+
+        function toggleTeacherRole(userId) {
+            const u = state.usersList.find(x => x.id === userId);
+            if (u) {
+                u.role = u.role === 'teacher' ? 'student' : 'teacher';
+                renderAdminTables();
+            }
+        }
+
+        function toggleBlockUser(userId) {
+            const u = state.usersList.find(x => x.id === userId);
+            if (u) {
+                u.status = u.status === 'Aktiv' ? 'Bloklangan' : 'Aktiv';
+                renderAdminTables();
+            }
+        }
+
+        // Test Creation Modal
+        function openCreateTestModal() {
+            document.getElementById('createTestModal').classList.remove('hidden');
+        }
+
+        function closeCreateTestModal() {
+            document.getElementById('createTestModal').classList.add('hidden');
+        }
+
+        function saveNewTest() {
+            const sub = document.getElementById('newTestSubject').value;
+            const title = document.getElementById('newTestTitle').value || 'Yangi Fan Testi';
+            const variant = document.getElementById('newTestVariant').value;
+            const timer = parseInt(document.getElementById('newTestTimer').value) || 15;
+            const isPaid = document.getElementById('newTestIsPaid').value === 'true';
+
+            const newTestObj = {
+                id: Date.now(),
+                subject: sub,
+                title: title,
+                variant: variant,
+                timerMinutes: timer,
+                isPaid: isPaid,
+                author: state.currentUserRole === 'superadmin' ? 'Katta Admin' : 'Sardor O\'qituvchi',
+                questions: [
+                    { q: '1-Namunaviy savol: Ushbu fan bo\'yicha asosiy tushuncha qaysi?', options: ['A javob', 'B javob', 'C javob', 'D javob'], correct: 0, exp: 'To\'g\'ri javob A.' }
+                ]
+            };
+
+            state.tests.push(newTestObj);
+            alert("Yangi test muvaffaqiyatli saqlandi!");
+            closeCreateTestModal();
+            renderAdminTables();
+            renderSubjectsList();
+        }
+
+        // Profile Chart Renderer
+        let chartInstance = null;
+        function renderProfileChart() {
+            const ctx = document.getElementById('studentSubjectChart');
+            if (!ctx) return;
+
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Matematika', 'Fizika', 'Kimyo', 'Ingliz tili'],
+                    datasets: [{
+                        data: [90, 75, 85, 95],
+                        backgroundColor: ['#0284c7', '#f59e0b', '#10b981', '#a855f7'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // Initialization on Load
+        window.onload = function() {
+            renderHomeSubjects();
+            switchTab('dashboard');
+        };
+    </script>
+</body>
+</html>
